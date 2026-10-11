@@ -23,7 +23,8 @@
     "productName": "Isolation Lab",
     "files": [
       "src/**/*",
-      "package.json"
+      "package.json",
+      "LICENSE"
     ],
     "extraResources": [
       {
@@ -45,5 +46,6 @@
   },
   "engines": {
     "node": ">=22.12.0"
-  }
+  },
+  "license": "CC0-1.0"
 }

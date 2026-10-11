@@ -77,3 +77,9 @@ For the Electron UI smoke test, make Playwright available (`npm install --no-sav
 - `src/index.html` and `src/styles.css` define the interface and layout.
 
 Run `npm run format` to format JavaScript, HTML, CSS, JSON, and Markdown, or `npm run format:check` to check them without modifying files. On macOS, run `npm run format:native` to format Swift using the tool included with Xcode Command Line Tools. Python tests use conventional four-space indentation and are not handled by these commands.
+
+## License
+
+This project is dedicated to the public domain under [CC0 1.0 Universal](LICENSE). To the extent possible under law, all copyright and related rights in the original project code and documentation are waived. You may copy, modify, distribute, and use it commercially without attribution.
+
+Third-party dependencies remain subject to their own licenses. This dedication does not apply to Apple’s Audio Unit implementation or other third-party software.
