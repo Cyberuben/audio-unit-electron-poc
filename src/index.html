@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'"
+    />
+    <title>Isolation Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">AUDIO EXPERIMENTS / 001</p>
+          <h1>Isolation Lab<span>.</span></h1>
+          <p class="subtitle">Keep the voice. Shape everything around it.</p>
+        </div>
+        <span class="badge" id="platform">CONNECTING</span>
+      </header>
+      <!-- Local file selection; file contents never leave this application. -->
+      <section class="clip panel">
+        <div class="file-icon">♫</div>
+        <div class="clip-info">
+          <p class="eyebrow">SOURCE AUDIO</p>
+          <h2 id="filename">Start with a sound.</h2>
+          <p id="filemeta">Open a local audio clip to explore voice isolation.</p>
+        </div>
+        <button id="open" class="primary" disabled>Open audio <span>↗</span></button>
+      </section>
+      <!-- Shared transport controls for the native and browser audio backends. -->
+      <section class="transport">
+        <div class="transport-left">
+          <button id="play" class="play" disabled aria-label="Play audio">▶</button
+          ><button id="restart" disabled>↺ Restart</button
+          ><label class="loop"><input type="checkbox" id="loop" disabled /> Loop clip</label>
+        </div>
+        <span id="duration">NO CLIP LOADED</span>
+      </section>
+      <!-- Native Audio Unit controls; disabled when the backend cannot host Audio Units. -->
+      <section class="panel effect">
+        <div class="effect-heading">
+          <div>
+            <p class="eyebrow">NATIVE AUDIO UNIT</p>
+            <h2>AUSoundIsolation</h2>
+          </div>
+          <label class="switch-label"
+            ><span id="effect-label">Effect on</span
+            ><input id="effect" type="checkbox" role="switch" checked disabled
+          /></label>
+        </div>
+        <p id="effect-description">Apple’s voice isolation, running directly on macOS.</p>
+        <div class="fader-label">
+          <label for="mix">Dry / wet mix</label><output id="mix-value">100%</output>
+        </div>
+        <input type="range" id="mix" min="0" max="100" value="100" step="1" disabled />
+        <div class="range-labels">
+          <span id="mix-min">0% · Original</span><span id="mix-max">100% · Isolated</span>
+        </div>
+      </section>
+      <!-- Canvas spectra are drawn by renderer.js from native FFT events or browser analysers. -->
+      <section class="graphs">
+        <article class="panel graph">
+          <div class="graph-heading">
+            <h3><i class="dot input"></i>Original signal</h3>
+            <span>PRE EFFECT</span>
+          </div>
+          <canvas id="input-graph" aria-label="Frequency spectrum of original audio"></canvas>
+          <div class="axis">
+            <span>20 Hz</span><span>100</span><span>1k</span><span>10k</span><span>20k</span>
+          </div>
+        </article>
+        <article class="panel graph">
+          <div class="graph-heading">
+            <h3><i class="dot output"></i>Output signal</h3>
+            <span>POST EFFECT</span>
+          </div>
+          <canvas id="output-graph" aria-label="Frequency spectrum of output audio"></canvas>
+          <div class="axis">
+            <span>20 Hz</span><span>100</span><span>1k</span><span>10k</span><span>20k</span>
+          </div>
+        </article>
+      </section>
+      <footer>
+        <span id="status" role="status">Starting audio engine…</span
+        ><span>LOCAL AUDIO · NO UPLOADS</span>
+      </footer>
+      <p class="note">
+        Spectra show the first channel, −100 to 0 dBFS. Output includes the current effect and mix
+        settings. Playback uses your default audio output.
+      </p>
+    </main>
+    <script src="renderer.js"></script>
+  </body>
+</html>
