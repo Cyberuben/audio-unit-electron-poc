@@ -21,7 +21,7 @@ with tempfile.TemporaryDirectory() as directory:
     with wave.open(clip, 'wb') as wav:
         wav.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
         samples = [
-            int(180 * math.sin(2 * math.pi * 440 * i / 48000) + random.uniform(-60, 60))
+            int(180 * math.sin(2 * math.pi * (880 if 24000 <= i < 57600 else 220) * i / 48000) + random.uniform(-60, 60))
             for i in range(48000 * 2)
         ]
         wav.writeframes(b''.join(struct.pack('<hh', sample, sample) for sample in samples))
@@ -63,6 +63,7 @@ with tempfile.TemporaryDirectory() as directory:
 
         send('load', path=clip)
         assert wait('loaded')['channels'] == 2
+        send('trim', start=0.5, end=1.2)
         send('mix', value=0)
         send('play')
         wait('playing')
@@ -77,6 +78,10 @@ with tempfile.TemporaryDirectory() as directory:
             assert len(data['bins']) == 1024
             assert all(math.isfinite(value) for value in data['bins'])
             assert max(data['bins']) > -70, (name, max(data['bins']))
+
+        bins = measured['input']['bins']
+        peak_hz = bins.index(max(bins)) * measured['input']['sampleRate'] / 2048
+        assert abs(peak_hz - 880) < 30, peak_hz
 
         send('pause')
         wait('paused')
@@ -111,7 +116,7 @@ with tempfile.TemporaryDirectory() as directory:
         assert error['type'] == 'error', error
         print(
             'PASS: load, audio spectra, pause/resume, signed mix, bypass, '
-            'end/restart, loop, invalid file'
+            'end/restart, trimmed loop, selected-region spectrum, invalid file'
         )
     finally:
         process.terminate()

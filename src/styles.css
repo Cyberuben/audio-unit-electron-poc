@@ -345,3 +345,66 @@ footer > span:last-child {
     padding-bottom: 19px;
   }
 }
+
+/* Repeatable A/B controls keep trim editing separate from effect settings. */
+.trim-panel {
+  padding: 18px 24px;
+}
+.trim-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#trim-summary {
+  color: #a0b6a7;
+  font-size: 12px;
+  font-family: monospace;
+}
+.trim-controls {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  margin-top: 16px;
+}
+.trim-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11px;
+  color: #a0b6a7;
+}
+input[type='number'],
+select {
+  background: #111816;
+  color: #e8efea;
+  border: 1px solid #435247;
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+}
+input[type='number'] {
+  width: 150px;
+}
+.backend-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 18px 0;
+}
+.backend-controls > label {
+  font-size: 12px;
+  color: #a0b6a7;
+}
+.backend-controls select {
+  font-size: 12px;
+}
+.backend-controls .note {
+  flex-basis: 100%;
+  margin: 0;
+}
+#compare {
+  margin-left: auto;
+  border-color: #8bba6c;
+  color: #bcf58a;
+}

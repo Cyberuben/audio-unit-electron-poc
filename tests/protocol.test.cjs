@@ -18,3 +18,20 @@ test('boolean controls reject ambiguous values', () => {
     assert.throws(() => validateCommand({ command, value: 'false' }));
   }
 });
+
+test('trim only accepts a finite ordered range and strips untrusted fields', () => {
+  assert.deepEqual(
+    validateCommand({ command: 'trim', start: 0.5, end: 1.2, path: '/etc/passwd' }),
+    { command: 'trim', start: 0.5, end: 1.2 },
+  );
+  for (const [start, end] of [
+    [-1, 1],
+    [1, 1],
+    [2, 1],
+    [0, Infinity],
+    [NaN, 1],
+    ['0', 1],
+  ]) {
+    assert.throws(() => validateCommand({ command: 'trim', start, end }));
+  }
+});

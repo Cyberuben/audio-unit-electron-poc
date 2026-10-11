@@ -4,6 +4,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('audioLab', {
   info: () => ipcRenderer.invoke('audio:info'),
   open: () => ipcRenderer.invoke('audio:open'),
+  loadNative: (id) => ipcRenderer.invoke('audio:load-native', id),
   command: (message) => ipcRenderer.invoke('audio:command', message),
   onEvent: (callback) => {
     const listener = (_event, message) => callback(message);

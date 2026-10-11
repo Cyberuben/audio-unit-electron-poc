@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'"
     />
     <title>Isolation Lab</title>
     <link rel="stylesheet" href="styles.css" />
@@ -35,23 +35,67 @@
         <div class="transport-left">
           <button id="play" class="play" disabled aria-label="Play audio">▶</button
           ><button id="restart" disabled>↺ Restart</button
-          ><label class="loop"><input type="checkbox" id="loop" disabled /> Loop clip</label>
+          ><label class="loop"><input type="checkbox" id="loop" disabled /> Loop selection</label>
         </div>
         <span id="duration">NO CLIP LOADED</span>
       </section>
-      <!-- Native Audio Unit controls; disabled when the backend cannot host Audio Units. -->
+      <section class="panel trim-panel">
+        <div class="trim-heading">
+          <div>
+            <p class="eyebrow">REPEAT THE SAME MOMENT</p>
+            <h2>Trim selection</h2>
+          </div>
+          <span id="trim-summary">Full clip</span>
+        </div>
+        <div class="trim-controls">
+          <label
+            >Start (seconds)<input
+              id="trim-start"
+              type="number"
+              min="0"
+              step="0.001"
+              value="0"
+              disabled
+          /></label>
+          <label
+            >End (seconds)<input
+              id="trim-end"
+              type="number"
+              min="0"
+              step="0.001"
+              value="0"
+              disabled
+          /></label>
+          <button id="apply-trim" disabled>Apply trim</button
+          ><button id="reset-trim" disabled>Full clip</button>
+        </div>
+        <p class="note">
+          Non-destructive: playback and looping use only this selection. Applying a trim restarts it
+          if playing.
+        </p>
+      </section>
+      <section class="backend-controls">
+        <label for="backend">Processing engine</label>
+        <select id="backend">
+          <option value="dfn">DeepFilterNet3</option>
+          <option id="au-option" value="au" disabled>AUSoundIsolation (macOS)</option>
+        </select>
+        <button id="compare" disabled>↔ Switch &amp; replay</button>
+        <p id="comparison-note" class="note"></p>
+      </section>
+      <!-- Each effect keeps its own mix value; the comparison button always replays the trim. -->
       <section class="panel effect">
         <div class="effect-heading">
           <div>
-            <p class="eyebrow">NATIVE AUDIO UNIT</p>
-            <h2>AUSoundIsolation</h2>
+            <p class="eyebrow" id="effect-kind">LOCAL WEBASSEMBLY</p>
+            <h2 id="effect-title">DeepFilterNet3</h2>
           </div>
           <label class="switch-label"
             ><span id="effect-label">Effect on</span
             ><input id="effect" type="checkbox" role="switch" checked disabled
           /></label>
         </div>
-        <p id="effect-description">Apple’s voice isolation, running directly on macOS.</p>
+        <p id="effect-description">Local DeepFilterNet3 voice isolation.</p>
         <div class="fader-label">
           <label for="mix">Dry / wet mix</label><output id="mix-value">100%</output>
         </div>
@@ -88,10 +132,10 @@
         ><span>LOCAL AUDIO · NO UPLOADS</span>
       </footer>
       <p class="note">
-        Spectra show the first channel, −100 to 0 dBFS. Output includes the current effect and mix
-        settings. Playback uses your default audio output.
+        Spectra: −100 to 0 dBFS; native channel one / DeepFilterNet3 mono downmix. Output includes
+        the active effect and mix. Playback uses your default output.
       </p>
     </main>
-    <script src="renderer.js"></script>
+    <script type="module" src="renderer.js"></script>
   </body>
 </html>

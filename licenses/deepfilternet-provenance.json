@@ -1,0 +1,20 @@
+{
+  "package": "@workadventure/noise-suppression",
+  "version": "0.2.0",
+  "sourceCommit": "7e00a1b7522f044a31776fddc249a97a98de94ed",
+  "wasmSourceCommit": "d375b2d8309e0935d165700c91da9de862a99c31",
+  "wasmBuildScript": "https://raw.githubusercontent.com/workadventure/noise-suppression/7e00a1b7522f044a31776fddc249a97a98de94ed/scripts/build-deepfilternet-wasm.sh",
+  "wasmPatch": "https://raw.githubusercontent.com/workadventure/noise-suppression/7e00a1b7522f044a31776fddc249a97a98de94ed/scripts/deepfilternet-tract-0.23.patch",
+  "licenses": [
+    "WorkAdventure-noise-suppression-MIT.txt",
+    "DeepFilterNet-MIT.txt",
+    "DeepFilterNet-APACHE.txt"
+  ],
+  "modelLicenseClarification": "https://github.com/Rikorose/DeepFilterNet/issues/697",
+  "assets": {
+    "deepfilternet.js": "15cd594b524ad214dce371f6f3a4ae4955ff2176f50cf4aaf5e4ca0a1091a60e",
+    "assets/deepfilternet-worklet-processor.js": "e91ddfeb95288e1359d61c1828c39e46474e06c8bbb4789bcd7da32c4593bb52",
+    "assets/deepfilternet/df_bg.wasm": "8ebf2b217b80fc128505b993c8d7d7d892df5a845ab7a2516fed74b76e7fe708",
+    "assets/deepfilternet/DeepFilterNet3_onnx.tar.gz": "c94d91f70911001c946e0fabb4aa9adc37045f45a03b56008cb0c8244cb63616"
+  }
+}

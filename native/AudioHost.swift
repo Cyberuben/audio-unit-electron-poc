@@ -69,6 +69,9 @@ final class AudioHost {
   var looping = false
   var playing = false
   var scheduleGeneration = 0
+  var needsSchedule = false
+  var trimStart: AVAudioFramePosition = 0
+  var trimEnd: AVAudioFramePosition = 0
   let inputSpectrum = SpectrumAnalyser()
   let outputSpectrum = SpectrumAnalyser()
   // Parameter address zero is the AU’s own wet/dry mix, not a host-side crossfade.
@@ -107,16 +110,25 @@ final class AudioHost {
     guard let file else { return }
     scheduleGeneration += 1
     let token = scheduleGeneration
-    player.scheduleFile(file, at: nil, completionCallbackType: .dataPlayedBack) { _ in
+    needsSchedule = false
+    // Invalidate callbacks before stopping. A restart must never resurrect an old loop.
+    player.stop()
+    player.scheduleSegment(
+      file, startingFrame: trimStart,
+      frameCount: AVAudioFrameCount(trimEnd - trimStart), at: nil,
+      completionCallbackType: .dataPlayedBack
+    ) { _ in
       DispatchQueue.main.async {
         // Ignore completion callbacks belonging to a replaced/stopped schedule.
         guard token == self.scheduleGeneration else { return }
         // Rescheduling here repeats the file, but does not promise gapless loop boundaries.
-        if self.looping {
+        if self.looping && self.playing {
           self.schedulePlayback()
           self.player.play()
+          emit(["type": "looped"])
         } else {
           self.playing = false
+          self.needsSchedule = true
           emit(["type": "ended"])
         }
       }
@@ -141,6 +153,8 @@ final class AudioHost {
     engine.disconnectNodeOutput(input)
     if let effect { engine.disconnectNodeOutput(effect) }
     file = next
+    trimStart = 0
+    trimEnd = next.length
     let format = next.processingFormat
     engine.connect(player, to: input, format: format)
     if let effect {
@@ -173,15 +187,40 @@ final class AudioHost {
       case "play":
         guard file != nil else { return }
         if !engine.isRunning { try engine.start() }
+        if needsSchedule { schedulePlayback() }
+        engine.mainMixerNode.outputVolume = 1
         if !playing && !player.isPlaying { player.play() }
         playing = true
         emit(["type": "playing"])
       case "pause":
+        // Silence any delayed AU output immediately before another backend starts.
+        engine.mainMixerNode.outputVolume = 0
         player.pause()
         playing = false
         emit(["type": "paused"])
       case "restart":
-        player.stop()
+        schedulePlayback()
+        if playing { player.play() }
+      case "trim":
+        guard let file, let start = data["start"] as? Double,
+          let end = data["end"] as? Double, start.isFinite, end.isFinite,
+          start >= 0, end > start,
+          end <= Double(file.length) / file.processingFormat.sampleRate + 0.001
+        else {
+          throw NSError(
+            domain: "AudioHost", code: 2,
+            userInfo: [NSLocalizedDescriptionKey: "Invalid trim range."])
+        }
+        let first = AVAudioFramePosition((start * file.processingFormat.sampleRate).rounded())
+        let last = min(
+          file.length, AVAudioFramePosition((end * file.processingFormat.sampleRate).rounded()))
+        guard last > first, last - first <= Int64(UInt32.max) else {
+          throw NSError(
+            domain: "AudioHost", code: 3,
+            userInfo: [NSLocalizedDescriptionKey: "Trim range is too short or too long."])
+        }
+        trimStart = first
+        trimEnd = last
         schedulePlayback()
         if playing { player.play() }
       case "loop": looping = data["value"] as? Bool ?? false
@@ -196,7 +235,15 @@ final class AudioHost {
         exit(0)
       default: break
       }
-    } catch { emit(["type": "error", "message": error.localizedDescription, "playing": playing]) }
+      // Acknowledge after graph mutations complete, so switching engines cannot overlap playback.
+      if let requestID = data["requestId"] { emit(["type": "ack", "requestId": requestID]) }
+    } catch {
+      var message: [String: Any] = [
+        "type": "error", "message": error.localizedDescription, "playing": playing,
+      ]
+      if let requestID = data["requestId"] { message["requestId"] = requestID }
+      emit(message)
+    }
   }
 }
 
